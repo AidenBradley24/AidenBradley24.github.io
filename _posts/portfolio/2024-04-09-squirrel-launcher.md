@@ -11,4 +11,6 @@ tags: ["game", "squirrel launcher"]
 I created a game called Squirrel Launcher. It was one of my favorite projects. It is developed using the Unity Game Engine and the C# programming language.
 The goal of the game is to launch squirrels into the air and upgrade their equipment to get further and further. It currently has very positive ratings on Steam.
 
-[Check out the game here!](https://store.steampowered.com/app/2254490/Squirrel_Launcher/)
+[Play the whole game on Steam for free!](https://store.steampowered.com/app/2254490/Squirrel_Launcher/)
+
+[Play a demo version in browser]({% post_url 2024-04-10-squirrel-launcher-demo %})
