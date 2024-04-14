@@ -1,0 +1,343 @@
+---
+layout: post
+title: "(Game in browser) Tic Tac Toe"
+categories: [Games]
+tags: ["game-in-browser"]
+---
+
+<style>
+
+    .center-body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: auto;
+        grid-column-gap: 10px;
+        grid-row-gap: 10px;
+        gap: 10px;
+        max-width: 90%; /* Adjust maximum width as needed */
+        justify-content: center;
+    }
+  
+    .grid-item {
+        background-color: gray;
+        color: black;
+        padding: 10px;
+        width: 100px;
+        height: 100px;
+        border-radius: 5%;
+        text-align: center;
+        font-weight: bold;
+        font-size: 50px;
+        border: 3px;
+        border-color: gray;
+        border-style: solid;
+        font-family: sans-serif;
+        transition: 0.2s;
+    }
+
+    .grid-item:hover {
+        border-radius: 25%;
+    }
+
+    .tic-tac-toe-message {
+        font-size: xxx-large;
+        text-align: center;
+    }
+</style>
+
+<div style="padding: 10px;">
+    <p>   
+        A simple game of tic-tac-toe.
+        SFX from <a href="https://mixkit.co/">mixkit</a>.
+    </p>
+</div>
+
+<audio id="playerTurnSound" src="https://assets.mixkit.co/active_storage/sfx/2857/2857-preview.mp3" preload="none"></audio>
+<audio id="oppTurnSound" src="https://assets.mixkit.co/active_storage/sfx/2858/2858-preview.mp3" preload="none"></audio>
+<audio id="finishSound" src="https://assets.mixkit.co/active_storage/sfx/1114/1114-preview.mp3" preload="none"></audio>
+
+<div>
+    <span id="message" class="tic-tac-toe-message"></span>
+    <div>
+        <div>
+            <span id="player-wins"></span>
+        </div>
+        <div>
+            <span id="opp-wins"></span>
+        </div>
+        <div>
+            <span id="ties"></span>
+        </div>
+    </div>
+</div> 
+
+<div class="center-body">  
+    <div class="grid-container">
+    <div id="grid-item 00" onclick="selectItem(0, 0)" class="grid-item"></div>
+    <div id="grid-item 10" onclick="selectItem(1, 0)" class="grid-item"></div>
+    <div id="grid-item 20" onclick="selectItem(2, 0)" class="grid-item"></div>
+    <div id="grid-item 01" onclick="selectItem(0, 1)" class="grid-item"></div>
+    <div id="grid-item 11" onclick="selectItem(1, 1)" class="grid-item"></div>
+    <div id="grid-item 21" onclick="selectItem(2, 1)" class="grid-item"></div>
+    <div id="grid-item 02" onclick="selectItem(0, 2)" class="grid-item"></div>
+    <div id="grid-item 12" onclick="selectItem(1, 2)" class="grid-item"></div>
+    <div id="grid-item 22" onclick="selectItem(2, 2)" class="grid-item"></div>
+    </div>
+</div>
+
+<script>
+    const PLAYER_WIN = 0;
+    const OPP_WIN = PLAYER_WIN + 1;
+    const TIE = PLAYER_WIN + 2;
+    const CONTINUE_GAME = PLAYER_WIN + 3;
+
+    var unfilled;
+    var grid;
+    var playerTurn = true;
+    var finished = false;
+
+    var playerWins = 0;
+    var oppWins = 0;
+    var ties = 0;
+
+    reset();
+    updateScoreboard();
+
+    function selectItem(x, y) {
+        if(!playerTurn || finished) return;
+        let text = grid[x][y].textContent;
+        if(text !== "") {
+            return;
+        }
+        grid[x][y].textContent = "X";
+        unfilled.delete(toKey(x, y));
+        showResults();
+        playerTurn = false;
+        setTimeout(comTurn, 1000);
+        document.getElementById("playerTurnSound").play();
+        changeOutline(x, y, "blue");
+        setTimeout(() => {        
+            changeOutline(x, y, "gray");
+        }, 1000);
+    }
+
+    function showResults() {
+        let result = checkCondition();
+        if(result == CONTINUE_GAME) return;
+        finished = true;
+        switch(result) {
+            case PLAYER_WIN:
+                document.getElementById("message").textContent = "PLAYER WIN";
+                console.log("PLAYER WIN");
+                playerWins++;
+                break;
+            case OPP_WIN:
+                document.getElementById("message").textContent = "OPPONENT WIN";
+                console.log("OPPONENT WIN");
+                oppWins++;
+                break;
+            case TIE:
+            document.getElementById("message").textContent = "TIE";
+                console.log("TIE");
+                ties++;
+                break;
+        }
+        
+        document.getElementById("finishSound").play();
+        setTimeout(() => {
+            reset();
+            if(!playerTurn) comTurn();
+        }, 2000);
+
+        updateScoreboard();
+    }
+
+    function updateScoreboard() {
+        document.getElementById("ties").textContent = "Ties: " + ties;
+        document.getElementById("player-wins").textContent = "Player Wins: " + playerWins;
+        document.getElementById("opp-wins").textContent = "Opponent Wins: " + oppWins;
+    }
+
+    function comTurn()
+    {
+        if(finished) return;
+        var choices = Array.from(unfilled);
+        var choice = getRandomInt(0, unfilled.size - 1);
+        var key = choices[choice];
+        unfilled.delete(key);
+        var x = parseInt(("" + key).charAt(0));
+        var y = parseInt(("" + key).charAt(1));
+        grid[x][y].textContent = "O";
+        showResults();
+        playerTurn = true;
+        changeOutline(x, y, "red");
+        document.getElementById("oppTurnSound").play();
+        setTimeout(() => {        
+            changeOutline(x, y, "gray");
+        }, 1000);
+    }
+
+    function reset() {
+        document.getElementById("message").textContent = "GAME ON";
+        finished = false;
+        grid = [];
+        unfilled = new Set();
+        for(let row = 0; row < 3; row++) {
+            grid.push([]);
+            for(let col = 0; col < 3; col++) {
+                grid[row].push(document.getElementById("grid-item " + row + col));
+                grid[row][col].textContent = "";
+                unfilled.add(toKey(row, col));
+            }
+        }
+    }
+
+    function toKey(x, y) {
+        return "" + x + y;
+    }
+
+    function changeOutline(x, y, color) {
+        grid[x][y].style.border = "3px solid " + color; 
+    }
+
+    // inclusive
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function valToWin(val) {
+        switch(val)
+        {
+            case "X":
+                return PLAYER_WIN;
+            case "O":
+                return OPP_WIN;
+        }
+        return null;
+    }
+
+    function checkCondition() {
+        // check rows
+        for(let row = 0; row < 3; row++) {
+            let good = true;
+            let val = grid[row][0].textContent;
+            if(val === "") continue;
+            for(let col = 1; col < 3; col++) {
+                let lVal = grid[row][col].textContent;
+                if(lVal !== val) {
+                    good = false;
+                    break;
+                }
+            }
+            if(good) { // someone won
+                let win = valToWin(val);
+                let color = win == PLAYER_WIN ? "blue" : "red";
+                for(let col = 0; col < 3; col++) {
+                    changeOutline(row, col, color);
+                    setTimeout(() => {        
+                        changeOutline(row, col, "gray");
+                    }, 1000);
+                }
+                return win;
+            }
+        }
+
+        // check columns
+        for(let col = 0; col < 3; col++) {
+            let good = true;
+            let val = grid[0][col].textContent;
+            if(val === "") continue;
+            for(let row = 1; row < 3; row++) {
+                let lVal = grid[row][col].textContent;
+                if(lVal !== val) {
+                    good = false;
+                    break;
+                }
+            }
+            if(good) { // someone won
+                let win = valToWin(val);
+                let color = win == PLAYER_WIN ? "blue" : "red";
+                for(let row = 0; row < 3; row++) {
+                    changeOutline(row, col, color);
+                    setTimeout(() => {        
+                        changeOutline(row, col, "gray");
+                    }, 1000);
+                }
+                return win;
+            }
+        }
+
+        // check diags
+        {
+            let good = true;
+            let val = grid[0][0].textContent;
+            if(val !== "") {
+                for(let i = 1; i < 3; i++) {
+                    let lVal = grid[i][i].textContent;
+                    if(lVal !== val) {
+                        good = false;
+                        break;
+                    }
+                }
+                if(good) { // someone won
+                    let win = valToWin(val);
+                    let color = win == PLAYER_WIN ? "blue" : "red";
+                    for(let i = 0; i < 3; i++) {
+                        changeOutline(i, i, color);
+                        setTimeout(() => {        
+                            changeOutline(i, i, "gray");
+                        }, 1000);
+                    }
+                    return win;
+                }
+            }
+        }
+
+        {
+            let good = true;
+            let val = grid[2][0].textContent;
+            if(val !== "") {
+                for(let i = 1; i < 3; i++) {
+                    let lVal = grid[2 - i][i].textContent;
+                    if(lVal !== val) {
+                        good = false;
+                        break;
+                    }
+                }
+                if(good) { // someone won
+                    let win = valToWin(val);
+                    let color = win == PLAYER_WIN ? "blue" : "red";
+                    for(let i = 0; i < 3; i++) {
+                        changeOutline(2 - i, i, color);
+                        setTimeout(() => {        
+                            changeOutline(2 - i, i, "gray");
+                        }, 1000);
+                    }
+                    return win;
+                }
+            }
+        }
+
+        if(unfilled.size == 0) {
+            for(let i = 0; i < grid.length; i++) {
+                for(let j = 0; j < grid[i].length; j++) {
+                    changeOutline(i, j, "white");
+                    setTimeout(() => {        
+                        changeOutline(i, j, "gray");
+                    }, 1000);
+                }
+            }
+            return TIE;
+        }
+        return CONTINUE_GAME;
+    }
+</script>
