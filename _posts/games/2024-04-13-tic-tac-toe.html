@@ -207,7 +207,6 @@ tags: ["game-in-browser"]
         grid[x][y].style.border = "3px solid " + color; 
     }
 
-    // inclusive
     function getRandomInt(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
@@ -226,7 +225,6 @@ tags: ["game-in-browser"]
     }
 
     function checkCondition() {
-        // check rows
         for(let row = 0; row < 3; row++) {
             let good = true;
             let val = grid[row][0].textContent;
@@ -238,7 +236,7 @@ tags: ["game-in-browser"]
                     break;
                 }
             }
-            if(good) { // someone won
+            if(good) {
                 let win = valToWin(val);
                 let color = win == PLAYER_WIN ? "blue" : "red";
                 for(let col = 0; col < 3; col++) {
@@ -251,7 +249,6 @@ tags: ["game-in-browser"]
             }
         }
 
-        // check columns
         for(let col = 0; col < 3; col++) {
             let good = true;
             let val = grid[0][col].textContent;
@@ -263,7 +260,7 @@ tags: ["game-in-browser"]
                     break;
                 }
             }
-            if(good) { // someone won
+            if(good) {
                 let win = valToWin(val);
                 let color = win == PLAYER_WIN ? "blue" : "red";
                 for(let row = 0; row < 3; row++) {
@@ -276,7 +273,6 @@ tags: ["game-in-browser"]
             }
         }
 
-        // check diags
         {
             let good = true;
             let val = grid[0][0].textContent;
@@ -288,7 +284,7 @@ tags: ["game-in-browser"]
                         break;
                     }
                 }
-                if(good) { // someone won
+                if(good) { 
                     let win = valToWin(val);
                     let color = win == PLAYER_WIN ? "blue" : "red";
                     for(let i = 0; i < 3; i++) {
@@ -313,7 +309,7 @@ tags: ["game-in-browser"]
                         break;
                     }
                 }
-                if(good) { // someone won
+                if(good) {
                     let win = valToWin(val);
                     let color = win == PLAYER_WIN ? "blue" : "red";
                     for(let i = 0; i < 3; i++) {
