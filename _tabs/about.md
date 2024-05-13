@@ -6,3 +6,5 @@ order: 4
 
 This is the offical site of Aiden Bradley.
 I am a computer scientist who likes to make things.
+
+[View my portfolio](../categories/portfolio/)
