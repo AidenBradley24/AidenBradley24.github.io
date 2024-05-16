@@ -1,0 +1,36 @@
+---
+layout: post
+title: "Hello World!"
+category: "Nonsense"
+---
+
+<style>
+    .my-section {
+        background-color: black;
+        color: green;
+        text-align: center;
+        font-size: 100%;
+        transition: 1s;
+    }
+
+    .my-section:hover {
+        font-size: 500%;
+        color: red;
+        transition: 1s;
+    }
+</style>
+
+<div class="my-section">
+    <span onclick="hi()">
+        hi
+        <br>
+        <b>hey</b>
+    </span>
+</div>
+
+<script>
+    function hi() {
+        console.log("hi");
+        alert("hi")
+    }
+</script>

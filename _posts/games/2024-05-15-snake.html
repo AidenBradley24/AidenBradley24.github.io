@@ -1,0 +1,308 @@
+---
+layout: post
+title: "(Game in browser) Snake"
+categories: [Games]
+tags: ["game-in-browser"]
+---
+
+<style>
+    .center-body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-rows: auto;
+        max-width: 90%;
+        justify-content: center;
+    }
+  
+    .grid-item {
+        background-color: gray;
+        color: black;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 50px;
+        border: 1px;
+        border-color: black;
+        border-style: solid;
+        font-family: sans-serif;
+        transition: 0.2s;
+    }
+
+    .snake-message {
+        font-size: xxx-large;
+        text-align: center;
+    }
+</style>
+
+<div style="padding: 10px;">
+    <p>   
+        A simple game of snake.
+        SFX from <a href="https://mixkit.co/">mixkit</a>.
+        <br>
+        Use WASD to move.
+    </p>
+</div>
+
+<div>
+    <span id="message" class="snake-message"></span>
+    <div>
+        <div>
+            <span id="time"></span>
+        </div>
+        <div>
+            <span id="length"></span>
+        </div>
+        <div>
+            <span id="highscore"><br></span>
+        </div>
+        <br>
+    </div>
+</div> 
+
+<div class="center-body">  
+    <div id="grid" class="grid-container">
+    </div>
+</div>
+
+<audio id="fruitSound" src="https://assets.mixkit.co/active_storage/sfx/1114/1114-preview.mp3" preload="none"></audio>
+
+
+<script>
+
+    const SIZEX = 12;
+    const SIZEY = 12;
+
+    const EMPTY = 0;
+    const SNAKE = 1;
+    const FRUIT = 2;
+    const WALL = 3;
+
+    const TICK_EVENT_NONE = 0;
+    const TICK_EVENT_FRUIT = 1;
+
+    const gridElement = document.getElementById("grid");
+    gridElement.style.gridTemplateColumns = "1fr ".repeat(SIZEX);
+    gridElement.style.gridTemplateRows = "1fr ".repeat(SIZEY);
+
+    var headX = Math.floor(SIZEX / 2);
+    var headY = Math.floor(SIZEY / 2);
+    var length = 0;
+    var highScore = 0;
+
+    var movementX = 0;
+    var movementY = 0;
+    var tickMovementX = 0;
+    var tickMovementY = 0;
+    var tickEvent = TICK_EVENT_NONE;
+
+    var snakeQueue = [];
+    var validSpots = new Set();
+
+    document.addEventListener('keydown', function(event) {
+
+        if(event.keyCode == 87 && tickMovementY == 0) {
+            /* up */
+            movementX = 0;
+            movementY = -1;
+        }
+        else if(event.keyCode == 83 && tickMovementY == 0) {
+            /* down */
+            movementX = 0;
+            movementY = 1;
+        }
+        else if(event.keyCode == 65 && tickMovementX == 0) {
+            /* left */
+            movementX = -1;
+            movementY = 0;
+        }
+        else if(event.keyCode == 68 && tickMovementX == 0) {
+            /* right */
+            movementX = 1;
+            movementY = 0;
+        }
+        else if(event.keyCode == 82) {
+            tickEvent = TICK_EVENT_FRUIT;
+        }
+    });
+
+    class Grid {
+        constructor(sizeX, sizeY) {
+            this.grid = [];
+            for (let i = 0; i < sizeX; i++) {
+                this.grid[i] = [];
+                for (let j = 0; j < sizeY; j++) {
+                    if (i == 0 || i == sizeX - 1 || j == 0 || j == sizeY - 1) {
+                        this.grid[i][j] = WALL;
+                    }
+                    else {
+                        this.grid[i][j] = EMPTY;
+                    }
+                }
+            }
+        }
+
+        check(x, y) {
+            return this.grid[x][y];
+        }
+
+        set(x, y, val) {
+            this.grid[x][y] = val; 
+        }
+    }
+
+    function getGridItemId(x, y) {
+        return "item-" + x + "-" + y;
+    }
+
+    function createGridItem(x, y) {
+        let gridItem = document.createElement("div");
+        gridItem.className = "grid-item";
+        gridItem.id = getGridItemId(x, y);
+        gridElement.appendChild(gridItem);
+    }
+
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function newFruit(grid) {
+        let i = getRandomInt(0, validSpots.size - 1);
+        var choices = Array.from(validSpots);
+        [x, y] = stringToPoint(choices[i]);
+        grid.set(x, y, FRUIT);
+        displayGridItem(grid, x, y);
+        document.getElementById("length").textContent = "Length: " + ++length;
+        document.getElementById("fruitSound").play();
+    }
+
+    function displayGridItem(grid, x, y) {
+        let item = document.getElementById(getGridItemId(x, y));
+        if (item == null) return;
+        var color = "gray";
+        
+        switch(grid.check(x, y)) {
+            case EMPTY:
+                color = "gray";
+                break;
+            case SNAKE:
+                color = "green";
+                break;
+            case FRUIT:
+                color = "red";
+                break;
+            case WALL:
+                color = "white";
+                break;
+        }
+        item.style.backgroundColor = color;
+    }
+
+    function gameTick(grid) {
+        /*Movement is backwards because reasons*/
+        headX += movementY;
+        headY += movementX;
+        tickMovementX = movementX;
+        tickMovementY = movementY;
+        validSpots.delete(pointToString(headX, headY));
+
+        if(tickEvent == TICK_EVENT_FRUIT) {
+            tickEvent = TICK_EVENT_NONE;
+            newFruit(grid);
+        }
+        else {
+            [tailX, tailY] = snakeQueue.shift();
+            grid.set(tailX, tailY, EMPTY);
+            displayGridItem(grid, tailX, tailY);
+            validSpots.add(pointToString(tailX, tailY));
+        }
+
+        let target = grid.check(headX, headY);
+        switch(target) {
+            case SNAKE:
+            case WALL:
+                gameover();
+                return;
+            case FRUIT:
+                tickEvent = TICK_EVENT_FRUIT;
+                break;
+        }
+
+        snakeQueue.push([headX, headY]);
+        grid.set(headX, headY, SNAKE);
+        displayGridItem(grid, headX, headY);
+
+        setTimeout(() => gameTick(grid), 200);
+    }
+
+    function gameover() {
+        if(validSpots.size == 0) {
+            showMessage("WINNER!");
+        }
+        else {
+            showMessage("GAME OVER");
+        }
+
+        var highscoreElement = document.getElementById("highscore");
+        if (length > highScore) {
+            highScore = length;
+            highscoreElement.textContent = "High Score: " + highScore;
+        }
+        setTimeout(() => start(), 2000)
+    }
+
+    function showMessage(message) {
+        document.getElementById("message").textContent = message;
+    }
+
+    function pointToString(x, y) {
+        return "" + x + ", " + y;
+    }
+
+    function stringToPoint(s) {
+        [x, y] = s.split(',');
+        return [Number(x), Number(y)]
+    }
+
+    function start() {
+        gridElement.innerHTML = "";
+        headX = Math.floor(SIZEX / 2);
+        headY = Math.floor(SIZEY / 2);
+        length = 0;
+        movementX = 0;
+        movementY = 0;
+        tickEvent = TICK_EVENT_NONE;
+        snakeQueue = [];
+        validSpots.clear();
+
+        var grid = new Grid(SIZEX, SIZEY);
+        grid.set(headX, headY, SNAKE);
+        snakeQueue.push([headX, headY]);
+
+        for(let i = 0; i < SIZEX; i++) {
+            for(let j = 0; j < SIZEY; j++) {
+                createGridItem(i, j);
+                displayGridItem(grid, i, j);
+                if (!(i == 0 || i == SIZEX - 1 || j == 0 || j == SIZEX - 1)) {
+                    validSpots.add(pointToString(i, j));
+                }
+            }
+        }
+        validSpots.delete(pointToString(headX, headY));
+
+        newFruit(grid);
+        gameTick(grid);
+
+        showMessage("GAME ON");
+    }
+
+    start();
+</script>
