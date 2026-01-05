@@ -2,6 +2,7 @@
 layout: post
 title: "Local Playlist Master"
 categories: [Portfolio, Apps]
+tags: ["C#"]
 ---
 
 Original release date: May 11th, 2024

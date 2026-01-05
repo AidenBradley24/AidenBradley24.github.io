@@ -2,7 +2,7 @@
 layout: post
 title: "Squirrel Launcher"
 categories: [Portfolio, Games]
-tags: ["game", "squirrel launcher"]
+tags: ["game", "squirrel launcher", "C#"]
 ---
 
 Original release date: January 4th, 2023

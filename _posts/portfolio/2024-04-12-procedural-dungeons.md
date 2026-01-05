@@ -2,7 +2,7 @@
 layout: post
 title: "Procedural Dungeons"
 categories: [Portfolio, Games]
-tags: ["game", "procedural dungeons"]
+tags: ["game", "C#"]
 ---
 
 Original release date: August 09, 2021

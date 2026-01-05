@@ -2,6 +2,7 @@
 layout: post
 title: "Card Games Using the React Framework"
 categories: [Portfolio, Games]
+tags: ["web development"]
 ---
 
 [Card Game Website](https://aidenbradley24.github.io/card-games/)
