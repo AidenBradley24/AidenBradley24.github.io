@@ -7,7 +7,7 @@ tags: ["C#", "web development"]
 
 Original release date: Fall 2025
 
-https://github.com/AidenBradley24/PlaylistRepoApp
+[https://github.com/AidenBradley24/PlaylistRepoApp](https://github.com/AidenBradley24/PlaylistRepoApp)
 
 Store your media in a system like GIT.
 
