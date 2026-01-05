@@ -7,7 +7,9 @@ tags: ["game", "C#", "web development"]
 
 Original release date: Spring 2025
 
-https://github.com/AidenBradley24/Echo-Island
+![Echo Island](https://raw.githubusercontent.com/AidenBradley24/Echo-Island/335b42e981ac11beb88d5f8158705532f15dd074/AIGame/_assets/title-banner.svg)
+
+[https://github.com/AidenBradley24/Echo-Island](https://github.com/AidenBradley24/Echo-Island)
 
 Echo island was my Senior Capstone for my Bachelors degree in Computer Science.
 
